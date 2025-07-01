@@ -1,0 +1,49 @@
+/* resources/css/app.css */
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* --- Variables CSS para Temas --- */
+
+/* Tema claro por defecto */
+:root {
+    --color-bg-primary: #f8f9fa;
+    --color-bg-secondary: #ffffff;
+    --color-text-primary: #212529;
+    --color-text-secondary: #6c757d;
+    --color-border: #dee2e6;
+    --color-link: #007bff;
+}
+
+/* Tema oscuro cuando el body tiene la clase 'dark' */
+body.dark {
+    --color-bg-primary: #1a202c;
+    --color-bg-secondary: #2d3748;
+    --color-text-primary: #e2e8f0;
+    --color-text-secondary: #a0aec0;
+    --color-border: #4a5568;
+    --color-link: #63b3ed;
+}
+
+/* --- Aplicación de Variables CSS a Elementos Base --- */
+
+/* Esto es crucial para que tus temas funcionen */
+body {
+    background-color: var(--color-bg-primary);
+    color: var(--color-text-primary);
+    transition: background-color 0.3s ease, color 0.3s ease; /* Para una transición suave */
+}
+
+/* Puedes aplicar variables a otros elementos base o componentes */
+a {
+    color: var(--color-link);
+}
+
+/* Si tienes un componente `Card` podrías hacer: */
+.card {
+    background-color: var(--color-bg-secondary);
+    border: 1px solid var(--color-border);
+    color: var(--color-text-primary);
+    transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease;
+}
