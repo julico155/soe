@@ -94,18 +94,12 @@ function handleImageError() {
                         class="flex flex-col items-center text-center p-6 mb-12 bg-white rounded-lg shadow-lg dark:bg-zinc-900"
                     >
                         <!-- Tu logo del postgrado en un tamaño más grande para la sección principal -->
-                        <img
-                            src="/images/logo_postgrado.png"
-                            alt="Logo Postgrado SOE"
-                            class="h-48 w-auto object-contain mb-8"
-                        />
+
                         <h1 class="text-4xl font-extrabold text-gray-900 dark:text-white mb-4">
-                            Sistema de Gestión de Postgrado
+                            Postgrado FICCT
                         </h1>
                         <p class="mt-4 text-lg text-gray-700 dark:text-gray-300 max-w-3xl">
-                            Bienvenido al Sistema de Gestión de Postgrado de la Facultad de Ingeniería en Ciencias de la Computación y Telecomunicaciones (FICCT) de la Universidad Autónoma Gabriel René Moreno (UAGRM).
-                            Esta plataforma está diseñada para optimizar la administración académica y el seguimiento de programas y módulos de postgrado, facilitando la interacción entre docentes, administrativos y estudiantes.
-                            Nuestro objetivo es proporcionar una herramienta eficiente y transparente para la gestión de su formación académica.
+                            La Unidad de Posgrado “School of Engineering” de la Facultad de Ingeniería en Ciencias de la Computación y Telecomunicaciones de la Universidad Autónoma Gabriel René Moreno tiene como propósito brindar servicios de formación académica a nivel de postgrado en el ámbito de la Informática y Telecomunicaciones.
                         </p>
                     </div>
 
