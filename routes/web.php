@@ -10,6 +10,7 @@ use App\Http\Controllers\RevisionController; // Importa tu controlador
 use App\Http\Controllers\HelpController;
 use App\Http\Controllers\DocenteController;
 use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\GlobalSearchController;
 
 Route::get('/', function () {
     return Inertia::render('Welcome', [
@@ -42,7 +43,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
     // Rutas para Docentes (opción A: Resource Controller para docentes)
     Route::resource('docentes', DocenteController::class);
     Route::resource('modulos.revisiones', RevisionController::class)->only(['create', 'store']);
-
+    Route::get('/search', [GlobalSearchController::class, 'index'])->name('global.search');
     Route::post('/revisiones/{revision}/justify', [RevisionController::class, 'justify'])->name('revisiones.justify');
 });
 

@@ -1,63 +1,56 @@
 // resources/js/Composables/useTheme.js
-
-// Importa las funciones reactivas de Vue 3 que vamos a necesitar
 import { ref, onMounted, watch } from 'vue';
 
-// Define y exporta la función composable
 export function useTheme() {
-    // 1. Estado Reactivo del Tema:
-    // 'ref' hace que 'theme' sea una variable reactiva.
-    // Esto significa que si 'theme.value' cambia, cualquier parte de tu UI que lo use se actualizará.
-    // Inicialmente, lo configuramos a 'light' como valor por defecto.
-    const theme = ref('light');
+    // Los temas disponibles
+    const themes = ['light', 'dark', 'child'];
 
-    // 2. Función para Alternar el Tema:
-    // Simplemente cambia el valor de 'theme' entre 'light' y 'dark'.
-    const toggleTheme = () => {
-        theme.value = theme.value === 'light' ? 'dark' : 'light';
+    // Función interna para aplicar/remover las clases de tema al body
+    // ¡MOVEMOS ESTA FUNCIÓN AL PRINCIPIO PARA QUE ESTÉ DEFINIDA ANTES DE SER USADA!
+    const applyTheme = (currentTheme) => {
+        // Remueve todas las clases de tema antes de añadir la nueva
+        document.body.classList.remove('light', 'dark', 'child-mode');
+
+        if (currentTheme === 'dark') {
+            document.body.classList.add('dark');
+        } else if (currentTheme === 'child') {
+            document.body.classList.add('child-mode'); // Nueva clase para el modo niño
+        }
+        // Si es 'light', no se añade ninguna clase específica (es el estado base)
+        console.log(`Tema aplicado: ${currentTheme}`); // Para depuración
     };
 
-    // 3. Lógica que se ejecuta cuando el componente que usa este composable se monta:
-    // Esto es crucial para cargar la preferencia guardada o la del sistema operativo al inicio.
-    onMounted(() => {
-        // Intenta obtener el tema guardado de LocalStorage
-        const savedTheme = localStorage.getItem('theme');
+    const theme = ref('light'); // Estado reactivo del tema, inicia en 'light'
 
-        if (savedTheme) {
-            // Si hay un tema guardado, lo usamos
+    // Función para cambiar el tema
+    const toggleTheme = () => {
+        const currentIndex = themes.indexOf(theme.value);
+        const nextIndex = (currentIndex + 1) % themes.length; // Ciclo a través de los temas
+        theme.value = themes[nextIndex];
+    };
+
+    // Al montar el componente, intenta cargar el tema de LocalStorage
+    onMounted(() => {
+        const savedTheme = localStorage.getItem('theme');
+        if (savedTheme && themes.includes(savedTheme)) { // Asegúrate de que el tema guardado sea válido
             theme.value = savedTheme;
         } else if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
-            // Si no hay nada guardado, verifica si el sistema operativo prefiere el tema oscuro
+            // Si no hay preferencia guardada y el sistema prefiere oscuro, usa 'dark'
             theme.value = 'dark';
         }
-
-        // Aplica el tema que se ha determinado (ya sea guardado, del sistema o el por defecto 'light')
-        applyTheme(theme.value);
+        // Si no hay preferencia guardada ni del sistema, se queda en 'light' por defecto
+        applyTheme(theme.value); // Aplica el tema inicial
     });
 
-    // 4. Observar Cambios en el Tema:
-    // 'watch' reacciona a los cambios en 'theme.value'.
-    // Cada vez que 'theme.value' cambie (por ejemplo, al llamar a 'toggleTheme'), esta función se ejecuta.
+    // Observa los cambios en 'theme.value' y aplica el tema y lo guarda
     watch(theme, (newTheme) => {
-        applyTheme(newTheme); // Aplica la clase CSS al body
-        localStorage.setItem('theme', newTheme); // Guarda la nueva preferencia en LocalStorage
-    });
+        applyTheme(newTheme);
+        localStorage.setItem('theme', newTheme);
+    }, { immediate: true }); // Agrega { immediate: true } para que el watcher se ejecute al inicio
 
-    // 5. Función Auxiliar para Aplicar la Clase CSS:
-    // Esta función maneja la adición/remoción de la clase 'dark' en el elemento <body>.
-    // Es lo que visualmente cambia tu tema.
-    const applyTheme = (currentTheme) => {
-        if (currentTheme === 'dark') {
-            document.body.classList.add('dark'); // Agrega la clase 'dark'
-        } else {
-            document.body.classList.remove('dark'); // Remueve la clase 'dark'
-        }
-    };
 
-    // 6. Retornar las Variables y Funciones que otros componentes pueden usar:
-    // Lo que retornamos aquí será accesible para cualquier componente que use 'useTheme()'.
     return {
-        theme,        // El estado actual del tema (reactivo)
-        toggleTheme   // La función para cambiar el tema
+        theme,
+        toggleTheme
     };
 }

@@ -8,42 +8,94 @@
 
 /* Tema claro por defecto */
 :root {
-    --color-bg-primary: #f8f9fa;
-    --color-bg-secondary: #ffffff;
-    --color-text-primary: #212529;
-    --color-text-secondary: #6c757d;
-    --color-border: #dee2e6;
-    --color-link: #007bff;
+    --color-app-bg-light: #f8f9fa; /* Fondo principal */
+    --color-app-text-light: #212529; /* Texto principal */
+    --color-app-nav-bg-light: #ffffff;
+    --color-app-nav-border-light: #e2e8f0;
+    --color-app-header-bg-light: #ffffff;
+    --color-app-card-bg-light: #ffffff;
+    --color-app-card-border-light: #e2e8f0;
+    --color-app-link-light: #007bff;
+    --color-app-link-hover-light: #0056b3;
+    --color-app-button-bg-secondary-light: #e2e8f0;
+    --color-app-button-text-secondary-light: #4a5568;
+    --color-app-input-bg-light: #ffffff;
+    --color-app-input-border-light: #d1d5db;
+    --color-app-flash-success-bg-light: #d1fae5; /* green-100 */
+    --color-app-flash-success-text-light: #065f46; /* green-700 */
+    --color-app-flash-error-bg-light: #fee2e2; /* red-100 */
+    --color-app-flash-error-text-light: #991b1b; /* red-700 */
 }
 
-/* Tema oscuro cuando el body tiene la clase 'dark' */
+/* Tema oscuro (valores para las variables --color-app-*-dark) */
 body.dark {
-    --color-bg-primary: #1a202c;
-    --color-bg-secondary: #2d3748;
-    --color-text-primary: #e2e8f0;
-    --color-text-secondary: #a0aec0;
-    --color-border: #4a5568;
-    --color-link: #63b3ed;
+    --color-app-bg-dark: #1a202c;
+    --color-app-text-dark: #e2e8f0;
+    --color-app-nav-bg-dark: #2d3748;
+    --color-app-nav-border-dark: #4a5568;
+    --color-app-header-bg-dark: #2d3748;
+    --color-app-card-bg-dark: #2d3748;
+    --color-app-card-border-dark: #4a5568;
+    --color-app-link-dark: #63b3ed;
+    --color-app-link-hover-dark: #4299e1;
+    --color-app-button-bg-secondary-dark: #4a5568;
+    --color-app-button-text-secondary-dark: #e2e8f0;
+    --color-app-input-bg-dark: #2d3748;
+    --color-app-input-border-dark: #4a5568;
+    --color-app-flash-success-bg-dark: #047857; /* green-800 */
+    --color-app-flash-success-text-dark: #d1fae5; /* green-100 */
+    --color-app-flash-error-bg-dark: #b91c1c; /* red-800 */
+    --color-app-flash-error-text-dark: #fee2e2; /* red-100 */
 }
 
-/* --- Aplicación de Variables CSS a Elementos Base --- */
+/* --- NUEVO: Tema Niño cuando el body tiene la clase 'child-mode' --- */
+/* Tema Niño (valores para las variables --color-app-*-child) */
+body.child-mode {
+    --color-app-bg-child: #e0f7fa; /* Azul claro pastel */
+    --color-app-text-child: #004d40; /* Verde oscuro */
+    --color-app-nav-bg-child: #80deea; /* Azul turquesa */
+    --color-app-nav-border-child: #4dd0e1;
+    --color-app-header-bg-child: #80deea;
+    --color-app-card-bg-child: #b2ebf2; /* Azul claro */
+    --color-app-card-border-child: #4dd0e1;
+    --color-app-link-child: #ff4081; /* Rosa brillante */
+    --color-app-link-hover-child: #f50057;
+    --color-app-button-bg-secondary-child: #ffccbc; /* Naranja pastel */
+    --color-app-button-text-secondary-child: #bf360c; /* Naranja oscuro */
+    --color-app-input-bg-child: #ffffff;
+    --color-app-input-border-child: #80deea;
+    --color-app-flash-success-bg-child: #c8e6c9; /* light green */
+    --color-app-flash-success-text-child: #1b5e20; /* dark green */
+    --color-app-flash-error-bg-child: #ffcdd2; /* light red */
+    --color-app-flash-error-text-child: #b71c1c; /* dark red */
+}
 
-/* Esto es crucial para que tus temas funcionen */
+
+/* Aplica las variables a tus elementos HTML/componentes */
 body {
     background-color: var(--color-bg-primary);
     color: var(--color-text-primary);
-    transition: background-color 0.3s ease, color 0.3s ease; /* Para una transición suave */
+    transition: background-color 0.3s ease, color 0.3s ease; /* Transición suave */
 }
 
-/* Puedes aplicar variables a otros elementos base o componentes */
-a {
-    color: var(--color-link);
-}
-
-/* Si tienes un componente `Card` podrías hacer: */
-.card {
+/* Ejemplo para un contenedor */
+.my-card {
     background-color: var(--color-bg-secondary);
     border: 1px solid var(--color-border);
     color: var(--color-text-primary);
     transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease;
 }
+
+/* Ejemplo para enlaces */
+a {
+    color: var(--color-link);
+    text-decoration: none;
+    transition: color 0.3s ease;
+}
+
+a:hover {
+    filter: brightness(0.8); /* Oscurece un poco al pasar el ratón */
+}
+
+/* También puedes añadir clases de Tailwind con dark: y child-mode: si lo prefieres para elementos específicos,
+   pero para los colores base, las variables CSS son más eficientes. */

@@ -1,77 +1,129 @@
 <script setup>
-// Importa el composable que acabamos de crear
-import { useTheme } from '@/Composables/useTheme'; // Asegúrate que la ruta sea correcta
+// Importa el composable del tema
+import { useTheme } from '@/Composables/useTheme';
+const { theme, toggleTheme } = useTheme(); // 'theme' ahora es reactivo y refleja el tema actual
 
-// Llama al composable. Esto "engancha" la lógica del tema a este componente.
-// 'theme' y 'toggleTheme' son ahora variables reactivas y funciones que puedes usar.
-const { theme, toggleTheme } = useTheme();
-
-import { ref } from 'vue';
+import { ref, computed } from 'vue'; // Importa computed para el texto del botón
 import ApplicationLogo from '@/Components/ApplicationLogo.vue';
 import Dropdown from '@/Components/Dropdown.vue';
 import DropdownLink from '@/Components/DropdownLink.vue';
 import NavLink from '@/Components/NavLink.vue';
 import ResponsiveNavLink from '@/Components/ResponsiveNavLink.vue';
-import { Link } from '@inertiajs/vue3';
+import { Link, useForm } from '@inertiajs/vue3';
 
 const showingNavigationDropdown = ref(false);
+
+// Formulario para la búsqueda global
+const searchForm = useForm({
+    query: '',
+});
+
+const submitSearch = () => {
+    searchForm.get(route('global.search'), {
+        preserveState: true,
+        preserveScroll: true,
+    });
+};
+
+// Propiedad computada para el texto del botón de tema
+const nextThemeText = computed(() => {
+    if (theme.value === 'light') {
+        return 'Oscuro';
+    } else if (theme.value === 'dark') {
+        return 'Niño';
+    } else { // theme.value === 'child'
+        return 'Claro';
+    }
+});
 </script>
 
 <template>
     <div>
-        <div class="min-h-screen bg-gray-100 dark:bg-gray-900"> <nav
-                class="border-b border-gray-100 bg-white dark:bg-gray-800 dark:border-gray-700" >
+        <div class="min-h-screen bg-gray-100 dark:bg-gray-900">
+            <nav
+                class="border-b border-gray-100 bg-white dark:bg-gray-800 dark:border-gray-700"
+            >
+                <!-- Primary Navigation Menu -->
                 <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
                     <div class="flex h-16 justify-between">
                         <div class="flex">
+                            <!-- Logo -->
                             <div class="flex shrink-0 items-center">
                                 <Link :href="route('dashboard')">
                                     <ApplicationLogo
-                                        class="block h-9 w-auto fill-current text-gray-800 dark:text-gray-200" />
+                                        class="block h-9 w-auto fill-current text-gray-800 dark:text-gray-200"
+                                    />
                                 </Link>
                             </div>
 
+                            <!-- Navigation Links -->
                             <div
                                 class="hidden space-x-8 sm:-my-px sm:ms-10 sm:flex"
                             >
                                 <NavLink
                                     :href="route('dashboard')"
                                     :active="route().current('dashboard')"
-                                    class="text-gray-800 dark:text-gray-200" active-class="border-indigo-400 dark:border-indigo-600 text-gray-900 dark:text-gray-100 bg-indigo-50 dark:bg-gray-700" inactive-class="text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 hover:border-gray-300 dark:hover:border-gray-700 focus:text-gray-700 dark:focus:text-gray-300 focus:border-gray-300 dark:focus:border-gray-700" >
+                                    class="text-gray-800 dark:text-gray-200"
+                                    active-class="border-indigo-400 dark:border-indigo-600 text-gray-900 dark:text-gray-100 bg-indigo-50 dark:bg-gray-700"
+                                    inactive-class="text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 hover:border-gray-300 dark:hover:border-gray-700 focus:text-gray-700 dark:focus:text-gray-300 focus:border-gray-300 dark:focus:border-gray-700"
+                                >
                                     Dashboard
                                 </NavLink>
                                 <NavLink :href="route('programas.index')" :active="route().current('programas.index')"
-                                    class="text-gray-800 dark:text-gray-200" >
+                                    class="text-gray-800 dark:text-gray-200"
+                                >
                                     Programas
                                 </NavLink>
                                 <NavLink :href="route('modulos.index')" :active="route().current('modulos.index')"
-                                    class="text-gray-800 dark:text-gray-200" >
+                                    class="text-gray-800 dark:text-gray-200"
+                                >
                                     Módulos
                                 </NavLink>
                                 <NavLink :href="route('docentes.index')" :active="route().current('docentes.index')"
-                                    class="text-gray-800 dark:text-gray-200" >
+                                    class="text-gray-800 dark:text-gray-200"
+                                >
                                     Docentes
                                 </NavLink>
                             </div>
                         </div>
 
                         <div class="hidden sm:ms-6 sm:flex sm:items-center">
+                            <!-- Input de Búsqueda Global -->
+                            <form @submit.prevent="submitSearch" class="flex items-center me-4">
+                                <input
+                                    type="search"
+                                    v-model="searchForm.query"
+                                    placeholder="Buscar..."
+                                    class="block w-64 rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50
+                                           dark:bg-gray-700 dark:border-gray-600 dark:text-gray-200 dark:focus:border-indigo-500 dark:focus:ring-indigo-500 transition-colors duration-300"
+                                />
+                                <button type="submit" class="ms-2 px-3 py-2 rounded-md bg-indigo-600 text-white text-sm font-medium hover:bg-indigo-700 dark:bg-indigo-700 dark:hover:bg-indigo-800 transition-colors duration-300">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                                    </svg>
+                                </button>
+                            </form>
+
+                            <!-- Botón de cambio de tema -->
                             <button
                                 @click="toggleTheme"
                                 class="px-3 py-2 rounded-md text-sm font-medium transition-colors duration-300
                                        bg-gray-200 text-gray-800
                                        dark:bg-gray-700 dark:text-gray-200
-                                       hover:bg-gray-300 dark:hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 dark:focus:ring-offset-gray-900"
+                                       hover:bg-gray-300 dark:hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 dark:focus:ring-offset-900"
                             >
-                                Cambiar a {{ theme === 'light' ? 'Oscuro' : 'Claro' }}
+                                Cambiar a {{ nextThemeText }}
                             </button>
+
+                            <!-- Settings Dropdown -->
                             <div class="relative ms-3">
                                 <Dropdown align="right" width="48">
                                     <template #trigger>
                                         <span class="inline-flex rounded-md">
                                             <button
                                                 type="button"
-                                                class="inline-flex items-center rounded-md border border-transparent bg-white px-3 py-2 text-sm font-medium leading-4 text-gray-500 transition duration-150 ease-in-out hover:text-gray-700 focus:outline-none dark:bg-gray-800 dark:text-gray-400 dark:hover:text-gray-300" >
+                                                class="inline-flex items-center rounded-md border border-transparent bg-white px-3 py-2 text-sm font-medium leading-4 text-gray-500 transition duration-150 ease-in-out hover:text-gray-700 focus:outline-none dark:bg-gray-800 dark:text-gray-400 dark:hover:text-gray-300"
+                                            >
                                                 {{ $page.props.auth.user.name }}
 
                                                 <svg
@@ -93,14 +145,16 @@ const showingNavigationDropdown = ref(false);
                                     <template #content>
                                         <DropdownLink
                                             :href="route('profile.edit')"
-                                            class="dark:text-gray-200 dark:hover:bg-gray-700" >
+                                            class="dark:text-gray-200 dark:hover:bg-gray-700"
+                                        >
                                             Profile
                                         </DropdownLink>
                                         <DropdownLink
                                             :href="route('logout')"
                                             method="post"
                                             as="button"
-                                            class="dark:text-gray-200 dark:hover:bg-gray-700" >
+                                            class="dark:text-gray-200 dark:hover:bg-gray-700"
+                                        >
                                             Log Out
                                         </DropdownLink>
                                     </template>
@@ -108,6 +162,7 @@ const showingNavigationDropdown = ref(false);
                             </div>
                         </div>
 
+                        <!-- Hamburger (Responsive Menu Toggle) -->
                         <div class="-me-2 flex items-center sm:hidden">
                             <button
                                 @click="
@@ -115,7 +170,8 @@ const showingNavigationDropdown = ref(false);
                                         !showingNavigationDropdown
                                 "
                                 class="inline-flex items-center justify-center rounded-md p-2 text-gray-400 transition duration-150 ease-in-out hover:bg-gray-100 hover:text-gray-500 focus:bg-gray-100 focus:text-gray-500 focus:outline-none
-                                       dark:text-gray-500 dark:hover:bg-gray-700 dark:hover:text-gray-400 dark:focus:bg-gray-700 dark:focus:text-gray-400" >
+                                       dark:text-gray-500 dark:hover:bg-gray-700 dark:hover:text-gray-400 dark:focus:bg-gray-700 dark:focus:text-gray-400"
+                            >
                                 <svg
                                     class="h-6 w-6"
                                     stroke="currentColor"
@@ -150,6 +206,7 @@ const showingNavigationDropdown = ref(false);
                     </div>
                 </div>
 
+                <!-- Responsive Navigation Menu -->
                 <div
                     :class="{
                         block: showingNavigationDropdown,
@@ -159,44 +216,70 @@ const showingNavigationDropdown = ref(false);
                 >
                     <div class="space-y-1 pb-3 pt-2">
                         <ResponsiveNavLink :href="route('dashboard')" :active="route().current('dashboard')"
-                            class="text-gray-800 dark:text-gray-200" active-class="border-indigo-400 dark:border-indigo-600 text-gray-700 dark:text-gray-100 bg-indigo-50 dark:bg-gray-700" inactive-class="text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-700 hover:border-gray-300 dark:hover:border-gray-600" >
+                            class="text-gray-800 dark:text-gray-200"
+                            active-class="border-indigo-400 dark:border-indigo-600 text-gray-700 dark:text-gray-100 bg-indigo-50 dark:bg-gray-700"
+                            inactive-class="text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-700 hover:border-gray-300 dark:hover:border-gray-600"
+                        >
                             Dashboard
                         </ResponsiveNavLink>
                         <ResponsiveNavLink :href="route('programas.index')" :active="route().current('programas.index')"
-                            class="text-gray-800 dark:text-gray-200" >
+                            class="text-gray-800 dark:text-gray-200"
+                        >
                             Programas
                         </ResponsiveNavLink>
                         <ResponsiveNavLink :href="route('modulos.index')" :active="route().current('modulos.index')"
-                            class="text-gray-800 dark:text-gray-200" >
+                            class="text-gray-800 dark:text-gray-200"
+                        >
                             Módulos
                         </ResponsiveNavLink>
                     </div>
 
+                    <!-- Responsive Settings Options -->
                     <div
-                        class="border-t border-gray-200 dark:border-gray-700 pb-1 pt-4" >
+                        class="border-t border-gray-200 dark:border-gray-700 pb-1 pt-4"
+                    >
                         <div class="px-4">
                             <div
-                                class="text-base font-medium text-gray-800 dark:text-gray-200" >
+                                class="text-base font-medium text-gray-800 dark:text-gray-200"
+                            >
                                 {{ $page.props.auth.user.name }}
                             </div>
-                            <div class="text-sm font-medium text-gray-500 dark:text-gray-400"> {{ $page.props.auth.user.email }}
+                            <div class="text-sm font-medium text-gray-500 dark:text-gray-400">
+                                {{ $page.props.auth.user.email }}
                             </div>
                         </div>
 
                         <div class="mt-3 space-y-1">
+                            <!-- Input de Búsqueda Global (Responsive) -->
+                            <form @submit.prevent="submitSearch" class="px-4 py-2">
+                                <input
+                                    type="search"
+                                    v-model="searchForm.query"
+                                    placeholder="Buscar..."
+                                    class="block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50
+                                           dark:bg-gray-700 dark:border-gray-600 dark:text-gray-200 dark:focus:border-indigo-500 dark:focus:ring-indigo-500 transition-colors duration-300"
+                                />
+                                <button type="submit" class="mt-2 w-full px-4 py-2 rounded-md bg-indigo-600 text-white text-sm font-medium hover:bg-indigo-700 dark:bg-indigo-700 dark:hover:bg-indigo-800 transition-colors duration-300">
+                                    Buscar
+                                </button>
+                            </form>
+
                             <ResponsiveNavLink @click="toggleTheme" as="button"
-                                class="dark:text-gray-200 dark:hover:bg-gray-700" >
-                                Cambiar a {{ theme === 'light' ? 'Oscuro' : 'Claro' }}
+                                class="dark:text-gray-200 dark:hover:bg-gray-700"
+                            >
+                                Cambiar a {{ nextThemeText }}
                             </ResponsiveNavLink>
                             <ResponsiveNavLink :href="route('profile.edit')"
-                                class="dark:text-gray-200 dark:hover:bg-gray-700" >
+                                class="dark:text-gray-200 dark:hover:bg-gray-700"
+                            >
                                 Profile
                             </ResponsiveNavLink>
                             <ResponsiveNavLink
                                 :href="route('logout')"
                                 method="post"
                                 as="button"
-                                class="dark:text-gray-200 dark:hover:bg-gray-700" >
+                                class="dark:text-gray-200 dark:hover:bg-gray-700"
+                            >
                                 Log Out
                             </ResponsiveNavLink>
                         </div>
@@ -204,15 +287,19 @@ const showingNavigationDropdown = ref(false);
                 </div>
             </nav>
 
+            <!-- Page Heading -->
             <header
-                class="bg-white shadow dark:bg-gray-800" v-if="$slots.header"
+                class="bg-white shadow dark:bg-gray-800"
+                v-if="$slots.header"
             >
                 <div class="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8">
                     <slot name="header" />
                 </div>
             </header>
 
-            <main class="bg-gray-100 dark:bg-gray-900 text-gray-900 dark:text-gray-100"> <slot />
+            <!-- Page Content -->
+            <main class="bg-gray-100 dark:bg-gray-900 text-gray-900 dark:text-gray-100">
+                <slot />
             </main>
         </div>
     </div>
