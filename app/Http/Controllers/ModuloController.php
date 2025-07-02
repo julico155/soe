@@ -6,24 +6,36 @@ use App\Models\Programa; // Para los selects en el formulario
 use App\Models\User;     // Para los selects de docentes
 use Illuminate\Http\Request;
 use Inertia\Inertia;
+use App\Models\Visit; // ¡Importa el modelo Visit!
 
 class ModuloController extends Controller
 {
     /**
-     * Display a listing of the resource.
+     * Display a listing of the resource and record the visit.
      */
     public function index()
     {
         // Carga los módulos con sus relaciones (programa y docente)
         // Selecciona solo id y name del docente para optimizar
         $modulos = Modulo::with(['programa:id,sigla,titulo', 'docente:id,name'])->orderBy('sigla')->get();
+
+        // Lógica para el contador de visitas de la página de índice de Módulos
+        $visitableId = 1; // ID arbitrario para la página de índice de Módulos
+        $visitableType = 'App\Models\Modulo_IndexPage'; // Tipo único para esta página
+        $visit = Visit::firstOrCreate(['visitable_id' => $visitableId, 'visitable_type' => $visitableType], ['count' => 0]);
+        $visit->increment('count');
+        $pageVisits = $visit->count;
+
         return Inertia::render('Modulos/Index', [
-            'modulos' => $modulos
+            'modulos' => $modulos,
+            'success' => session('success'),
+            'error' => session('error'),
+            'pageVisits' => $pageVisits, // Pasa el contador a la vista
         ]);
     }
 
     /**
-     * Show the form for creating a new resource.
+     * Show the form for creating a new resource and record the visit.
      */
     public function create()
     {
@@ -31,9 +43,17 @@ class ModuloController extends Controller
         $programas = Programa::orderBy('titulo')->get(['id', 'titulo', 'sigla']);
         $docentes = User::where('tipo', 'docente')->orderBy('name')->get(['id', 'name']);
 
+        // Lógica para el contador de visitas de la página de creación de Módulos
+        $visitableId = 2; // ID arbitrario para la página de creación de Módulos
+        $visitableType = 'App\Models\Modulo_CreatePage'; // Tipo único para esta página
+        $visit = Visit::firstOrCreate(['visitable_id' => $visitableId, 'visitable_type' => $visitableType], ['count' => 0]);
+        $visit->increment('count');
+        $pageVisits = $visit->count;
+
         return Inertia::render('Modulos/Create', [
             'programas' => $programas,
             'docentes' => $docentes,
+            'pageVisits' => $pageVisits, // Pasa el contador a la vista
         ]);
     }
 
@@ -57,7 +77,7 @@ class ModuloController extends Controller
     }
 
     /**
-     * Display the specified resource.
+     * Display the specified resource and record the visit.
      */
     public function show(Modulo $modulo)
     {
@@ -69,14 +89,23 @@ class ModuloController extends Controller
         // Opcional: Obtener la última revisión para pasarla directamente a la vista
         $ultimaRevision = $modulo->revisiones->first();
 
+        // Lógica para el contador de visitas de la página de detalle de un Módulo específico
+        // Aquí usamos el ID del módulo como visitable_id para contar visitas por módulo individual
+        $visitableId = $modulo->id;
+        $visitableType = 'App\Models\Modulo'; // Usa el nombre del modelo directamente
+        $visit = Visit::firstOrCreate(['visitable_id' => $visitableId, 'visitable_type' => $visitableType], ['count' => 0]);
+        $visit->increment('count');
+        $pageVisits = $visit->count;
+
         return Inertia::render('Modulos/Show', [
             'modulo' => $modulo,
             'ultimaRevision' => $ultimaRevision, // Pasa la última revisión a la vista
+            'pageVisits' => $pageVisits, // Pasa el contador a la vista
         ]);
     }
 
     /**
-     * Show the form for editing the specified resource.
+     * Show the form for editing the specified resource and record the visit.
      */
     public function edit(Modulo $modulo)
     {
@@ -84,10 +113,19 @@ class ModuloController extends Controller
         $programas = Programa::orderBy('titulo')->get(['id', 'titulo', 'sigla']);
         $docentes = User::where('tipo', 'docente')->orderBy('name')->get(['id', 'name']);
 
+        // Lógica para el contador de visitas de la página de edición de un Módulo específico
+        // Usamos el ID del módulo como visitable_id
+        $visitableId = $modulo->id;
+        $visitableType = 'App\Models\Modulo_EditPage'; // Tipo único para la página de edición de un módulo
+        $visit = Visit::firstOrCreate(['visitable_id' => $visitableId, 'visitable_type' => $visitableType], ['count' => 0]);
+        $visit->increment('count');
+        $pageVisits = $visit->count;
+
         return Inertia::render('Modulos/Edit', [
             'modulo' => $modulo,
             'programas' => $programas,
             'docentes' => $docentes,
+            'pageVisits' => $pageVisits, // Pasa el contador a la vista
         ]);
     }
 
@@ -116,12 +154,17 @@ class ModuloController extends Controller
     public function destroy(Modulo $modulo)
     {
         try {
+            // Antes de eliminar el módulo, verifica si tiene revisiones asociadas
+            if ($modulo->revisiones()->count() > 0) {
+                return redirect()->back()->with('error', 'No se puede eliminar el módulo porque tiene revisiones asociadas.');
+            }
+
             $modulo->delete();
             return redirect()->route('modulos.index')
                              ->with('success', 'Módulo eliminado exitosamente.');
         } catch (\Illuminate\Database\QueryException $e) {
             return redirect()->route('modulos.index')
-                             ->with('error', 'No se pudo eliminar el módulo. Puede que tenga revisiones asociadas.');
+                             ->with('error', 'No se pudo eliminar el módulo. Ocurrió un error en la base de datos.');
         }
     }
 }

@@ -6,6 +6,7 @@ import { computed } from 'vue';
 const props = defineProps({
     query: String, // La consulta de búsqueda que se realizó
     results: Object, // Un objeto con los resultados: { users: [], programas: [], modulos: [] }
+    pageVisits: Number,
 });
 
 // Propiedad computada para verificar si hay algún resultado en total
@@ -29,6 +30,9 @@ const hasResults = computed(() => {
         <div class="py-12">
             <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
                 <div class="bg-white dark:bg-gray-800 overflow-hidden shadow-sm sm:rounded-lg p-6">
+                    <div class="mb-4 text-gray-700 p-3 bg-gray-50 rounded-lg shadow-sm">
+                        Visitas a esta página: <span class="font-bold text-indigo-600">{{ pageVisits }}</span>
+                    </div>
                     <div v-if="hasResults">
                         <!-- Sección de Usuarios -->
                         <div v-if="results.users.length > 0" class="mb-8">

@@ -8,12 +8,21 @@ use App\Models\User; // Importa el modelo User
 use App\Enums\UserType; // Asegúrate de importar tu Enum UserType
 use Illuminate\Http\Request;
 use Inertia\Inertia;
+use App\Models\Visit; // ¡Importa el modelo Visit!
 
 class DashboardController extends Controller
 {
     public function index(Request $request)
     {
         $user = $request->user(); // Obtiene el usuario autenticado
+
+        // Lógica para el contador de visitas de la página del Dashboard
+        // Usamos un ID arbitrario (ej. 100) y un tipo específico para la página del Dashboard.
+        $visitableId = 100;
+        $visitableType = 'App\Models\DashboardPage'; // Tipo único para la página del Dashboard
+        $visit = Visit::firstOrCreate(['visitable_id' => $visitableId, 'visitable_type' => $visitableType], ['count' => 0]);
+        $visit->increment('count');
+        $pageVisits = $visit->count;
 
         // Si el usuario es de tipo 'docente'
         if ($user && $user->tipo === UserType::Docente->value) {
@@ -25,6 +34,7 @@ class DashboardController extends Controller
 
             return Inertia::render('DashboardDocente', [
                 'modulos' => $modulosDocente, // Pasa los módulos al componente Vue
+                'pageVisits' => $pageVisits, // Pasa el contador a la vista del docente también
             ]);
         }
 
@@ -74,6 +84,7 @@ class DashboardController extends Controller
                 'porcentajeAvancePromedio' => $averageModuleCompletion,
             ],
             'docenteStats' => $docenteStats, // Pasa los datos de los docentes
+            'pageVisits' => $pageVisits, // Pasa el contador a la vista
         ]);
     }
 }

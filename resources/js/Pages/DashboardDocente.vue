@@ -8,6 +8,7 @@ const props = defineProps({
         type: Array,
         required: true,
     },
+    pageVisits: Number,
 });
 
 // Puedes acceder a los módulos así: props.modulos
@@ -50,9 +51,15 @@ const props = defineProps({
                                 </p>
                             </Link>
                         </div>
+                        <div class="mb-4 text-gray-700 p-3 bg-gray-50 rounded-lg shadow-sm">
+                            Visitas a esta página: <span class="font-bold text-indigo-600">{{ pageVisits }}</span>
+                        </div>
                     </div>
                     <div v-else class="text-gray-600 dark:text-gray-400">
                         <p>No tienes módulos asignados en este momento.</p>
+                        <div class="mb-4 text-gray-700 p-3 bg-gray-50 rounded-lg shadow-sm">
+                            Visitas a esta página: <span class="font-bold text-indigo-600">{{ pageVisits }}</span>
+                        </div>
                     </div>
                 </div>
             </div>

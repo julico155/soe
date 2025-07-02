@@ -6,6 +6,7 @@ import { computed, ref } from 'vue'; // Importa ref
 const props = defineProps({
     modulo: Object,
     ultimaRevision: Object, // Esta prop es la última revisión del módulo (si existe)
+    pageVisits: Number,
 });
 
 const flashSuccess = computed(() => usePage().props.flash?.success);
@@ -79,6 +80,9 @@ const submitJustification = () => {
         <div class="py-12">
             <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
                 <div class="bg-white dark:bg-gray-800 overflow-hidden shadow-sm sm:rounded-lg">
+                    <div class="mb-4 text-gray-700 p-3 bg-gray-50 rounded-lg shadow-sm">
+                            Visitas : <span class="font-bold text-600">{{ pageVisits }}</span>
+                    </div>
                     <div class="p-6 text-gray-900 dark:text-gray-100">
                         <div v-if="flashSuccess" class="bg-green-100 border-l-4 border-green-500 text-green-700 p-4 mb-4 dark:bg-green-800 dark:text-green-100" role="alert">
                             {{ flashSuccess }}

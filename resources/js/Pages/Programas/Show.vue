@@ -4,6 +4,7 @@ import { Head, Link } from '@inertiajs/vue3';
 
 const props = defineProps({
     programa: Object, // El objeto programa con sus módulos cargados
+    pageVisits: Number,
 });
 </script>
 
@@ -20,6 +21,9 @@ const props = defineProps({
         <div class="py-12">
             <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
                 <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
+                    <div class="mb-4 text-gray-700 p-3 bg-gray-50 rounded-lg shadow-sm">
+                            Visitas : <span class="font-bold text-600">{{ pageVisits }}</span>
+                    </div>
                     <div class="p-6 text-gray-900">
                         <div class="mb-4">
                             <p><strong>Sigla:</strong> {{ programa.sigla }}</p>

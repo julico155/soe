@@ -2,23 +2,32 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\User;    // Importa el modelo User
+use App\Models\User;     // Importa el modelo User
 use App\Models\Programa; // Importa el modelo Programa
-use App\Models\Modulo;  // Importa el modelo Modulo
+use App\Models\Modulo;   // Importa el modelo Modulo
 use Illuminate\Http\Request;
 use Inertia\Inertia;
+use App\Models\Visit; // ¡Importa el modelo Visit!
 
 class GlobalSearchController extends Controller
 {
     /**
      * Maneja la solicitud de búsqueda global.
-     * Busca en usuarios, programas y módulos.
+     * Busca en usuarios, programas y módulos y registra la visita.
      *
      * @param  \Illuminate\Http\Request  $request
      * @return \Inertia\Response
      */
     public function index(Request $request)
     {
+        // Lógica para el contador de visitas de la página de Búsqueda Global
+        // Usamos un ID arbitrario (ej. 200) y un tipo específico para esta página.
+        $visitableId = 200;
+        $visitableType = 'App\Models\GlobalSearchPage'; // Tipo único para la página de búsqueda global
+        $visit = Visit::firstOrCreate(['visitable_id' => $visitableId, 'visitable_type' => $visitableType], ['count' => 0]);
+        $visit->increment('count');
+        $pageVisits = $visit->count;
+
         // Obtiene la consulta de búsqueda del input 'query'
         $query = $request->input('query');
         $results = [
@@ -53,10 +62,11 @@ class GlobalSearchController extends Controller
                                         ->get();
         }
 
-        // Renderiza el componente Vue 'SearchResults' y le pasa la consulta y los resultados
+        // Renderiza el componente Vue 'SearchResults' y le pasa la consulta, los resultados y el contador de visitas
         return Inertia::render('SearchResults', [
             'query' => $query,
             'results' => $results,
+            'pageVisits' => $pageVisits, // Pasa el contador a la vista
         ]);
     }
 }

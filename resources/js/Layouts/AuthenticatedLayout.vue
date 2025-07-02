@@ -9,9 +9,19 @@ import Dropdown from '@/Components/Dropdown.vue';
 import DropdownLink from '@/Components/DropdownLink.vue';
 import NavLink from '@/Components/NavLink.vue';
 import ResponsiveNavLink from '@/Components/ResponsiveNavLink.vue';
-import { Link, useForm } from '@inertiajs/vue3';
+import { Link, useForm, usePage } from '@inertiajs/vue3'; // Importa usePage
 
 const showingNavigationDropdown = ref(false);
+
+// Accede a las props de la página, incluyendo la información del usuario
+const page = usePage();
+
+// Propiedad computada para verificar si el usuario es administrativo
+const isAdmin = computed(() => page.props.auth.user && page.props.auth.user.tipo === 'administrativo');
+
+// Propiedad computada para verificar si el usuario es docente
+// Se mantiene por si se usa en otros lugares, pero no afecta la navegación aquí.
+const isDocente = computed(() => page.props.auth.user && page.props.auth.user.tipo === 'docente');
 
 // Formulario para la búsqueda global
 const searchForm = useForm({
@@ -25,13 +35,11 @@ const submitSearch = () => {
     });
 };
 
-// Propiedad computada para el texto del botón de tema
+// Propiedad computada para el texto del botón de tema (solo Claro/Oscuro)
 const nextThemeText = computed(() => {
     if (theme.value === 'light') {
         return 'Oscuro';
-    } else if (theme.value === 'dark') {
-        return 'Niño';
-    } else { // theme.value === 'child'
+    } else { // theme.value === 'dark'
         return 'Claro';
     }
 });
@@ -39,6 +47,7 @@ const nextThemeText = computed(() => {
 
 <template>
     <div>
+        <!-- Usamos bg-gray-100 y dark:bg-gray-900 para que cambien según el tema. -->
         <div class="min-h-screen bg-gray-100 dark:bg-gray-900">
             <nav
                 class="border-b border-gray-100 bg-white dark:bg-gray-800 dark:border-gray-700"
@@ -56,7 +65,7 @@ const nextThemeText = computed(() => {
                                 </Link>
                             </div>
 
-                            <!-- Navigation Links -->
+                            <!-- Navigation Links (Desktop) -->
                             <div
                                 class="hidden space-x-8 sm:-my-px sm:ms-10 sm:flex"
                             >
@@ -69,18 +78,25 @@ const nextThemeText = computed(() => {
                                 >
                                     Dashboard
                                 </NavLink>
-                                <NavLink :href="route('programas.index')" :active="route().current('programas.index')"
+                                <!-- Solo para administrativos -->
+                                <NavLink v-if="isAdmin" :href="route('programas.index')" :active="route().current('programas.index')"
                                     class="text-gray-800 dark:text-gray-200"
+                                    active-class="border-indigo-400 dark:border-indigo-600 text-gray-900 dark:text-gray-100 bg-indigo-50 dark:bg-gray-700"
+                                    inactive-class="text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 hover:border-gray-300 dark:hover:border-gray-700 focus:text-gray-700 dark:focus:text-gray-300 focus:border-gray-300 dark:focus:border-gray-700"
                                 >
                                     Programas
                                 </NavLink>
-                                <NavLink :href="route('modulos.index')" :active="route().current('modulos.index')"
+                                <NavLink v-if="isAdmin" :href="route('modulos.index')" :active="route().current('modulos.index')"
                                     class="text-gray-800 dark:text-gray-200"
+                                    active-class="border-indigo-400 dark:border-indigo-600 text-gray-900 dark:text-gray-100 bg-indigo-50 dark:bg-gray-700"
+                                    inactive-class="text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 hover:border-gray-300 dark:hover:border-gray-700 focus:text-gray-700 dark:focus:text-gray-300 focus:border-gray-300 dark:focus:border-gray-700"
                                 >
                                     Módulos
                                 </NavLink>
-                                <NavLink :href="route('docentes.index')" :active="route().current('docentes.index')"
+                                <NavLink v-if="isAdmin" :href="route('docentes.index')" :active="route().current('docentes.index')"
                                     class="text-gray-800 dark:text-gray-200"
+                                    active-class="border-indigo-400 dark:border-indigo-600 text-gray-900 dark:text-gray-100 bg-indigo-50 dark:bg-gray-700"
+                                    inactive-class="text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 hover:border-gray-300 dark:hover:border-gray-700 focus:text-gray-700 dark:focus:text-gray-300 focus:border-gray-300 dark:focus:border-gray-700"
                                 >
                                     Docentes
                                 </NavLink>
@@ -88,8 +104,8 @@ const nextThemeText = computed(() => {
                         </div>
 
                         <div class="hidden sm:ms-6 sm:flex sm:items-center">
-                            <!-- Input de Búsqueda Global -->
-                            <form @submit.prevent="submitSearch" class="flex items-center me-4">
+                            <!-- Input de Búsqueda Global (Visible solo para administrativos) -->
+                            <form v-if="isAdmin" @submit.prevent="submitSearch" class="flex items-center me-4">
                                 <input
                                     type="search"
                                     v-model="searchForm.query"
@@ -104,7 +120,7 @@ const nextThemeText = computed(() => {
                                 </button>
                             </form>
 
-                            <!-- Botón de cambio de tema -->
+                            <!-- Botón de cambio de tema (Visible para todos) -->
                             <button
                                 @click="toggleTheme"
                                 class="px-3 py-2 rounded-md text-sm font-medium transition-colors duration-300
@@ -115,7 +131,7 @@ const nextThemeText = computed(() => {
                                 Cambiar a {{ nextThemeText }}
                             </button>
 
-                            <!-- Settings Dropdown -->
+                            <!-- Settings Dropdown (Visible para todos) -->
                             <div class="relative ms-3">
                                 <Dropdown align="right" width="48">
                                     <template #trigger>
@@ -170,7 +186,7 @@ const nextThemeText = computed(() => {
                                         !showingNavigationDropdown
                                 "
                                 class="inline-flex items-center justify-center rounded-md p-2 text-gray-400 transition duration-150 ease-in-out hover:bg-gray-100 hover:text-gray-500 focus:bg-gray-100 focus:text-gray-500 focus:outline-none
-                                       dark:text-gray-500 dark:hover:bg-gray-700 dark:hover:text-gray-400 dark:focus:bg-gray-700 dark:focus:text-gray-400"
+                                           dark:text-gray-500 dark:hover:bg-gray-700 dark:hover:text-gray-400 dark:focus:bg-gray-700 dark:focus:text-gray-400"
                             >
                                 <svg
                                     class="h-6 w-6"
@@ -222,15 +238,27 @@ const nextThemeText = computed(() => {
                         >
                             Dashboard
                         </ResponsiveNavLink>
-                        <ResponsiveNavLink :href="route('programas.index')" :active="route().current('programas.index')"
+                        <!-- Solo para administrativos en el menú responsive -->
+                        <ResponsiveNavLink v-if="isAdmin" :href="route('programas.index')" :active="route().current('programas.index')"
                             class="text-gray-800 dark:text-gray-200"
+                            active-class="border-indigo-400 dark:border-indigo-600 text-gray-700 dark:text-gray-100 bg-indigo-50 dark:bg-gray-700"
+                            inactive-class="text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-700 hover:border-gray-300 dark:hover:border-gray-600"
                         >
                             Programas
                         </ResponsiveNavLink>
-                        <ResponsiveNavLink :href="route('modulos.index')" :active="route().current('modulos.index')"
+                        <ResponsiveNavLink v-if="isAdmin" :href="route('modulos.index')" :active="route().current('modulos.index')"
                             class="text-gray-800 dark:text-gray-200"
+                            active-class="border-indigo-400 dark:border-indigo-600 text-gray-700 dark:text-gray-100 bg-indigo-50 dark:bg-gray-700"
+                            inactive-class="text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-700 hover:border-gray-300 dark:hover:border-gray-600"
                         >
                             Módulos
+                        </ResponsiveNavLink>
+                        <ResponsiveNavLink v-if="isAdmin" :href="route('docentes.index')" :active="route().current('docentes.index')"
+                            class="text-gray-800 dark:text-gray-200"
+                            active-class="border-indigo-400 dark:border-indigo-600 text-gray-700 dark:text-gray-100 bg-indigo-50 dark:bg-gray-700"
+                            inactive-class="text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-700 hover:border-gray-300 dark:hover:border-gray-600"
+                        >
+                            Docentes
                         </ResponsiveNavLink>
                     </div>
 
@@ -251,7 +279,7 @@ const nextThemeText = computed(() => {
 
                         <div class="mt-3 space-y-1">
                             <!-- Input de Búsqueda Global (Responsive) -->
-                            <form @submit.prevent="submitSearch" class="px-4 py-2">
+                            <form v-if="isAdmin" @submit.prevent="submitSearch" class="px-4 py-2">
                                 <input
                                     type="search"
                                     v-model="searchForm.query"

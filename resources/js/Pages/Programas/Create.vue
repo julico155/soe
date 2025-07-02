@@ -11,6 +11,10 @@ const form = useForm({
     tipo: '',
     titulo: '',
 });
+const props = defineProps({
+    // ... otras props
+    pageVisits: Number, // Asegúrate de que esta prop esté definida
+});
 
 const submit = () => {
     form.post(route('programas.store'));
@@ -28,6 +32,9 @@ const submit = () => {
         <div class="py-12">
             <div class="max-w-md mx-auto sm:px-6 lg:px-8">
                 <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
+                        <div class="mb-4 text-gray-700 p-3 bg-gray-50 rounded-lg shadow-sm">
+                            Visitas : <span class="font-bold text-600">{{ pageVisits }}</span>
+                        </div>
                     <div class="p-6 text-gray-900">
                         <form @submit.prevent="submit">
                             <div class="mb-4">

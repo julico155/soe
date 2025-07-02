@@ -4,26 +4,47 @@ namespace App\Http\Controllers;
 use App\Models\Programa;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
+use App\Models\Visit; // Importa el modelo Visit
 
 class ProgramaController extends Controller
 {
     /**
-     * Display a listing of the resource.
+     * Display a listing of the resource and record the visit.
      */
     public function index()
     {
         $programas = Programa::orderBy('sigla')->get(); // Ordenar por sigla para mejor visualización
+
+        // Lógica para el contador de visitas de la página de índice de Programas
+        $visitableId = 1; // ID arbitrario para la página de índice de Programas
+        $visitableType = 'App\Models\Programa_IndexPage'; // Tipo único para esta página
+        $visit = Visit::firstOrCreate(['visitable_id' => $visitableId, 'visitable_type' => $visitableType], ['count' => 0]);
+        $visit->increment('count');
+        $pageVisits = $visit->count;
+
         return Inertia::render('Programas/Index', [
-            'programas' => $programas
+            'programas' => $programas,
+            'success' => session('success'),
+            'error' => session('error'),
+            'pageVisits' => $pageVisits, // Pasa el contador a la vista
         ]);
     }
 
     /**
-     * Show the form for creating a new resource.
+     * Show the form for creating a new resource and record the visit.
      */
     public function create()
     {
-        return Inertia::render('Programas/Create');
+        // Lógica para el contador de visitas de la página de creación de Programas
+        $visitableId = 2; // ID arbitrario para la página de creación de Programas
+        $visitableType = 'App\Models\Programa_CreatePage'; // Tipo único para esta página
+        $visit = Visit::firstOrCreate(['visitable_id' => $visitableId, 'visitable_type' => $visitableType], ['count' => 0]);
+        $visit->increment('count');
+        $pageVisits = $visit->count;
+
+        return Inertia::render('Programas/Create', [
+            'pageVisits' => $pageVisits, // Pasa el contador a la vista
+        ]);
     }
 
     /**
@@ -32,8 +53,8 @@ class ProgramaController extends Controller
     public function store(Request $request)
     {
         $request->validate([
-            'sigla' => 'required|string|max:20|unique:programas,sigla', // max:20 de tu esquema
-            'tipo' => 'required|string|max:20|in:maestria,diplomado,doctorado', // max:20 y restricción CHECK
+            'sigla' => 'required|string|max:20|unique:programas,sigla',
+            'tipo' => 'required|string|max:20|in:maestria,diplomado,doctorado',
             'titulo' => 'required|string|max:255',
         ]);
 
@@ -44,24 +65,40 @@ class ProgramaController extends Controller
     }
 
     /**
-     * Display the specified resource.
+     * Display the specified resource and record the visit.
      */
     public function show(Programa $programa)
     {
-        // Inertia no tiene un componente 'show' por defecto,
-        // pero podrías crear uno para ver detalles de un programa específico
+        // Lógica para el contador de visitas de la página de detalle de un Programa específico
+        // Aquí usamos el ID del programa como visitable_id para contar visitas por programa individual
+        $visitableId = $programa->id;
+        $visitableType = 'App\Models\Programa'; // Usa el nombre del modelo directamente
+        $visit = Visit::firstOrCreate(['visitable_id' => $visitableId, 'visitable_type' => $visitableType], ['count' => 0]);
+        $visit->increment('count');
+        $pageVisits = $visit->count;
+
         return Inertia::render('Programas/Show', [
-            'programa' => $programa->load('modulos') // Carga también sus módulos si los quieres mostrar
+            'programa' => $programa->load('modulos'), // Carga también sus módulos si los quieres mostrar
+            'pageVisits' => $pageVisits, // Pasa el contador a la vista
         ]);
     }
 
     /**
-     * Show the form for editing the specified resource.
+     * Show the form for editing the specified resource and record the visit.
      */
     public function edit(Programa $programa)
     {
+        // Lógica para el contador de visitas de la página de edición de un Programa específico
+        // Usamos el ID del programa como visitable_id
+        $visitableId = $programa->id;
+        $visitableType = 'App\Models\Programa_EditPage'; // Tipo único para la página de edición de un programa
+        $visit = Visit::firstOrCreate(['visitable_id' => $visitableId, 'visitable_type' => $visitableType], ['count' => 0]);
+        $visit->increment('count');
+        $pageVisits = $visit->count;
+
         return Inertia::render('Programas/Edit', [
-            'programa' => $programa
+            'programa' => $programa,
+            'pageVisits' => $pageVisits, // Pasa el contador a la vista
         ]);
     }
 
@@ -71,7 +108,7 @@ class ProgramaController extends Controller
     public function update(Request $request, Programa $programa)
     {
         $request->validate([
-            'sigla' => 'required|string|max:20|unique:programas,sigla,' . $programa->id, // Excluye el propio ID para updates
+            'sigla' => 'required|string|max:20|unique:programas,sigla,' . $programa->id,
             'tipo' => 'required|string|max:20|in:maestria,diplomado,doctorado',
             'titulo' => 'required|string|max:255',
         ]);
@@ -88,13 +125,17 @@ class ProgramaController extends Controller
     public function destroy(Programa $programa)
     {
         try {
+            // Antes de eliminar el programa, verifica si tiene módulos asociados
+            if ($programa->modulos()->count() > 0) {
+                return redirect()->back()->with('error', 'No se puede eliminar el programa porque tiene módulos asociados.');
+            }
+
             $programa->delete();
             return redirect()->route('programas.index')
                              ->with('success', 'Programa eliminado exitosamente.');
         } catch (\Illuminate\Database\QueryException $e) {
-            // Manejo de errores si hay claves foráneas (aunque onDelete('cascade') lo evita normalmente)
             return redirect()->route('programas.index')
-                             ->with('error', 'No se pudo eliminar el programa. Puede que esté asociado a módulos.');
+                             ->with('error', 'No se pudo eliminar el programa. Ocurrió un error en la base de datos.');
         }
     }
 }

@@ -13,6 +13,7 @@ ChartJS.register(ArcElement, Tooltip, Legend);
 const props = defineProps({
     stats: Object,
     docenteStats: Array, // Nueva prop para las estadísticas de docentes
+    pageVisits: Number,
 });
 
 // Propiedad computada para organizar los datos de las tarjetas de estadísticas
@@ -137,6 +138,9 @@ const pieChartOptions = computed(() => {
                     <p class="mt-2 text-sm text-app-text transition-colors duration-300">
                         Navega a las secciones de Programas, Módulos o Docentes para una gestión más detallada.
                     </p>
+                    <div class="mb-4 text-gray-700 p-3 bg-gray-50 rounded-lg shadow-sm">
+                        Visitas a esta página: <span class="font-bold text-indigo-600">{{ pageVisits }}</span>
+                    </div>
                 </div>
             </div>
         </div>
