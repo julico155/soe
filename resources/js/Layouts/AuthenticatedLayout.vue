@@ -4,7 +4,7 @@ import { useTheme } from '@/Composables/useTheme';
 const { theme, toggleTheme } = useTheme(); // 'theme' ahora es reactivo y refleja el tema actual
 
 import { ref, computed } from 'vue'; // Importa computed para el texto del botón
-import ApplicationLogo from '@/Components/ApplicationLogo.vue';
+// import ApplicationLogo from '@/Components/ApplicationLogo.vue'; // Eliminamos esta importación
 import Dropdown from '@/Components/Dropdown.vue';
 import DropdownLink from '@/Components/DropdownLink.vue';
 import NavLink from '@/Components/NavLink.vue';
@@ -56,11 +56,13 @@ const nextThemeText = computed(() => {
                 <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
                     <div class="flex h-16 justify-between">
                         <div class="flex">
-                            <!-- Logo -->
+                            <!-- Logo (anteriormente ApplicationLogo, ahora logo2.png) -->
                             <div class="flex shrink-0 items-center">
                                 <Link :href="route('dashboard')">
-                                    <ApplicationLogo
-                                        class="block h-9 w-auto fill-current text-gray-800 dark:text-gray-200"
+                                    <img
+                                        src="/images/logo2.png"
+                                        alt="Logo de la Aplicación"
+                                        class="block h-9 w-auto"
                                     />
                                 </Link>
                             </div>
