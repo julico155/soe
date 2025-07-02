@@ -141,7 +141,7 @@ const submitJustification = () => {
                                 </div>
                                 <!-- Mostrar observaciones del administrador -->
                                 <div v-if="revision.observacion" class="mt-3 p-2 bg-gray-50 rounded-md border border-gray-200 dark:bg-gray-600 dark:border-gray-500">
-                                    <p class="font-semibold text-gray-800 dark:text-gray-200">Observaciones del Administrador:</p>
+                                    <p class="font-semibold text-gray-800 dark:text-gray-200">Observaciones del Supervisor:</p>
                                     <p class="text-gray-700 whitespace-pre-wrap dark:text-gray-300">{{ revision.observacion }}</p>
                                 </div>
                                 <div v-else class="mt-3 text-gray-500 text-sm dark:text-gray-400">
