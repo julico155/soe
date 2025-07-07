@@ -8,26 +8,48 @@ use Illuminate\Database\Eloquent\Model;
 class Revision extends Model
 {
     use HasFactory;
+
     protected $table = 'revisiones';
+
     protected $fillable = [
         'modulo_id',
-        'p_score',
-        'o_score',
-        's1_score',
-        'total_score', // Incluir el total en fillable
-        'observacion', // <-- ¡Añade esta línea!
-
+        'criterio1_1_cumplido',
+        'criterio1_2_cumplido',
+        'criterio1_3_cumplido',
+        'criterio1_4_cumplido',
+        'criterio2_1_cumplido',
+        'criterio2_2_cumplido',
+        'criterio2_3_cumplido',
+        'criterio2_4_cumplido',
+        'criterio3_1_cumplido',
+        'criterio3_2_cumplido',
+        'observacion',
+        'justificacion',
     ];
 
     protected $casts = [
-        'p_score' => 'integer',
-        'o_score' => 'integer',
-        's1_score' => 'integer',
-        'total_score' => 'integer',
+        'criterio1_1_cumplido' => 'boolean',
+        'criterio1_2_cumplido' => 'boolean',
+        'criterio1_3_cumplido' => 'boolean',
+        'criterio1_4_cumplido' => 'boolean',
+        'criterio2_1_cumplido' => 'boolean',
+        'criterio2_2_cumplido' => 'boolean',
+        'criterio2_3_cumplido' => 'boolean',
+        'criterio2_4_cumplido' => 'boolean',
+        'criterio3_1_cumplido' => 'boolean',
+        'criterio3_2_cumplido' => 'boolean',
     ];
 
     public function modulo()
     {
-        return $this->belongsTo(Modulo::class);
+        return $this->belongsTo(Modulo::class, 'modulo_id');
+    }
+
+    /**
+     * Get the images for the revision.
+     */
+    public function images()
+    {
+        return $this->hasMany(RevisionImage::class);
     }
 }

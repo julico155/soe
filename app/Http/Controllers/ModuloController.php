@@ -81,26 +81,27 @@ class ModuloController extends Controller
      */
     public function show(Modulo $modulo)
     {
-        // Cargar el programa, docente y todas las revisiones ordenadas por la más reciente
-        $modulo->load(['programa', 'docente', 'revisiones' => function($query) {
-            $query->latest(); // Ordena las revisiones por 'created_at' en orden descendente
-        }]);
+        // Cargar las revisiones del módulo, ordenadas por la más reciente
+        // Y cargar las imágenes de cada revisión
+        $modulo->load(['revisiones' => function ($query) {
+            $query->latest()->with('images'); // Cargar la última revisión y sus imágenes
+        }, 'programa', 'docente']); // Cargar también programa y docente
 
-        // Opcional: Obtener la última revisión para pasarla directamente a la vista
-        $ultimaRevision = $modulo->revisiones->first();
+        $ultimaRevision = $modulo->revisiones->first(); // La revisión más reciente
 
-        // Lógica para el contador de visitas de la página de detalle de un Módulo específico
-        // Aquí usamos el ID del módulo como visitable_id para contar visitas por módulo individual
+        // Lógica para el contador de visitas de la página de detalle del Módulo
         $visitableId = $modulo->id;
-        $visitableType = 'App\Models\Modulo'; // Usa el nombre del modelo directamente
+        $visitableType = 'App\Models\Modulo';
         $visit = Visit::firstOrCreate(['visitable_id' => $visitableId, 'visitable_type' => $visitableType], ['count' => 0]);
         $visit->increment('count');
         $pageVisits = $visit->count;
 
         return Inertia::render('Modulos/Show', [
             'modulo' => $modulo,
-            'ultimaRevision' => $ultimaRevision, // Pasa la última revisión a la vista
-            'pageVisits' => $pageVisits, // Pasa el contador a la vista
+            'ultimaRevision' => $ultimaRevision,
+            'pageVisits' => $pageVisits,
+            'success' => session('success'),
+            'error' => session('error'),
         ]);
     }
 

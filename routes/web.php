@@ -45,6 +45,17 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::resource('modulos.revisiones', RevisionController::class)->only(['create', 'store']);
     Route::get('/search', [GlobalSearchController::class, 'index'])->name('global.search');
     Route::post('/revisiones/{revision}/justify', [RevisionController::class, 'justify'])->name('revisiones.justify');
+
+
+    Route::resource('revisiones', RevisionController::class)->except(['create', 'store']);
+
+        // Rutas anidadas para Revisiones dentro de Módulos
+    // Esto crea rutas como /modulos/{modulo}/revisiones/create, /modulos/{modulo}/revisiones
+
+    // Rutas para Revisiones (para show, edit, update, destroy de una revisión específica)
+    // Usamos 'revisions' como nombre de recurso para las rutas singulares de revisiones
+    Route::resource('revisions', RevisionController::class)->except(['create', 'store', 'index']);
+    // Añadir ruta específica para la justificación
 });
 
 require __DIR__.'/auth.php';

@@ -2,103 +2,266 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Modulo;
 use App\Models\Revision;
+use App\Models\Modulo; // Asegúrate de importar el modelo Modulo
 use Illuminate\Http\Request;
 use Inertia\Inertia;
+use App\Models\RevisionImage;
 
 class RevisionController extends Controller
 {
     /**
-     * Show the form for creating a new Revision for a specific Modulo.
-     *
-     * @param  \App\Models\Modulo  $modulo
-     * @return \Inertia\Response
+     * Display a listing of the revisions.
      */
-    public function create(Modulo $modulo)
+    public function index()
     {
-        // Opcional: Podrías querer pasar la última revisión para mostrar su puntuación
-        // o información relevante si el usuario está creando una "segunda" revisión.
-        // Pero para el formulario de creación, solo necesitamos el ID del módulo.
-        return Inertia::render('Revisiones/Create', [
-            'modulo' => [
-                'id' => $modulo->id,
-                'nombre' => $modulo->nombre,
-                'sigla' => $modulo->sigla,
-            ],
+        // Cargar todas las revisiones, incluyendo el módulo, el programa del módulo y las imágenes de la revisión.
+        // Ordenar por la fecha de creación de la revisión más reciente primero.
+        $revisions = Revision::with(['modulo.programa', 'images'])
+                             ->latest() // Ordenar por la revisión más reciente
+                             ->get();
+
+        return Inertia::render('Revision/Index', [
+            'revisions' => $revisions,
+            'success' => session('success'),
+            'error' => session('error'),
         ]);
     }
 
     /**
-     * Store a newly created Revision in storage.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @param  \App\Models\Modulo  $modulo
-     * @return \Illuminate\Http\RedirectResponse
+     * Show the form for creating a new revision for a specific modulo.
+     */
+    public function create(Modulo $modulo) // Recibe el módulo como parámetro
+    {
+        return Inertia::render('Revision/Create', [ // La vista está en Modulos/Revision
+            'modulo' => $modulo,
+            // Si necesitas pasar otros datos, como estudiantes, hazlo aquí
+        ]);
+    }
+
+    /**
+     * Store a newly created revision in storage for a specific modulo.
      */
     public function store(Request $request, Modulo $modulo)
     {
         $validatedData = $request->validate([
-            'p_score' => 'required|integer|min:0|max:4',
-            'o_score' => 'required|integer|min:0|max:4',
-            's1_score' => 'required|integer|min:0|max:2',
+            'criterio1_1_cumplido' => 'boolean',
+            'criterio1_2_cumplido' => 'boolean',
+            'criterio1_3_cumplido' => 'boolean',
+            'criterio1_4_cumplido' => 'boolean',
+            'criterio2_1_cumplido' => 'boolean',
+            'criterio2_2_cumplido' => 'boolean',
+            'criterio2_3_cumplido' => 'boolean',
+            'criterio2_4_cumplido' => 'boolean',
+            'criterio3_1_cumplido' => 'boolean',
+            'criterio3_2_cumplido' => 'boolean',
             'observacion' => 'nullable|string|max:1000',
+            'justificacion' => 'nullable|string|max:1000',
+            // Validación para las imágenes: un array de cadenas Base64, cada una max 5MB
+            'images.*' => 'nullable|string|max:5242880', // 5MB en caracteres (aprox)
+            'images' => 'array', // Asegura que 'images' es un array
         ]);
 
-        $totalScore = $validatedData['p_score'] + $validatedData['o_score'] + $validatedData['s1_score'];
+        $validatedData['criterio1_1_cumplido'] = $request->boolean('criterio1_1_cumplido');
+        $validatedData['criterio1_2_cumplido'] = $request->boolean('criterio1_2_cumplido');
+        $validatedData['criterio1_3_cumplido'] = $request->boolean('criterio1_3_cumplido');
+        $validatedData['criterio1_4_cumplido'] = $request->boolean('criterio1_4_cumplido');
+        $validatedData['criterio2_1_cumplido'] = $request->boolean('criterio2_1_cumplido');
+        $validatedData['criterio2_2_cumplido'] = $request->boolean('criterio2_2_cumplido');
+        $validatedData['criterio2_3_cumplido'] = $request->boolean('criterio2_3_cumplido');
+        $validatedData['criterio2_4_cumplido'] = $request->boolean('criterio2_4_cumplido');
+        $validatedData['criterio3_1_cumplido'] = $request->boolean('criterio3_1_cumplido');
+        $validatedData['criterio3_2_cumplido'] = $request->boolean('criterio3_2_cumplido');
 
-        $modulo->revisiones()->create([
-            'p_score' => $validatedData['p_score'],
-            'o_score' => $validatedData['o_score'],
-            's1_score' => $validatedData['s1_score'],
-            'total_score' => $totalScore,
-            'observacion' => $validatedData['observacion'],
-        ]);
+        $validatedData['modulo_id'] = $modulo->id;
 
-        // --- ¡NUEVA LÓGICA AQUÍ! ---
-        // Calcula el nuevo porcentaje de avance del módulo basándose en la última revisión
-        $newPercentage = ($totalScore / 10) * 100;
+        // Crear la revisión
+        $revision = Revision::create($validatedData);
 
-        // Actualiza el campo 'porcentaje_avance' del módulo
-        $modulo->update(['porcentaje_avance' => $newPercentage]);
-        // --- FIN DE NUEVA LÓGICA ---
+        // Guardar las imágenes si existen
+        if ($request->has('images') && is_array($request->images)) {
+            foreach ($request->images as $imageData) {
+                // Extraer el tipo MIME y los datos Base64
+                // El formato esperado es "data:image/png;base64,..."
+                if (preg_match('/^data:(.*?);base64,(.*)$/', $imageData, $matches)) {
+                    $mimeType = $matches[1];
+                    $base64Data = $matches[2];
 
-        $message = 'Revisión añadida.';
-        if ($newPercentage >= 100) { // Usamos newPercentage en lugar de totalScore directamente
-            $message .= ' Módulo completado al 100%.';
-        } else {
-            $message .= ' El módulo aún no alcanza el 100% de avance.';
+                    RevisionImage::create([
+                        'revision_id' => $revision->id,
+                        'image_base64' => $base64Data,
+                        'mime_type' => $mimeType,
+                        // 'filename' => 'image_' . uniqid() . '.' . explode('/', $mimeType)[1], // Puedes generar un nombre de archivo único
+                    ]);
+                }
+            }
         }
+
+        $this->updateModuloPorcentajeAvance($modulo);
 
         return redirect()->route('modulos.show', $modulo->id)
-                         ->with('success', $message);
+                         ->with('success', 'Revisión añadida exitosamente.');
+    }
+
+    /**
+     * Display the specified revision.
+     */
+    public function show(Revision $revision)
+    {
+        $revision->load(['modulo', 'images']); // Cargar también las imágenes
+
+        $totalScore = 0;
+        foreach (range(1, 3) as $cat) {
+            $maxCriterios = ($cat == 1 || $cat == 2) ? 4 : 2;
+            for ($i = 1; $i <= $maxCriterios; $i++) {
+                $criterioName = "criterio{$cat}_{$i}_cumplido";
+                if ($revision->$criterioName) {
+                    $totalScore += 1;
+                }
+            }
+        }
+
+        return Inertia::render('Revision/Show', [
+            'revision' => $revision,
+            'totalScore' => $totalScore,
+        ]);
     }
 
 
-        public function justify(Request $request, Revision $revision)
+    /**
+     * Show the form for editing the specified revision.
+     */
+    public function edit(Revision $revision)
     {
-        // 1. Autorización: Asegúrate de que solo el docente asignado al módulo de esta revisión pueda justificarla
-        // y que el usuario logueado sea un docente.
-        if ($request->user()->id !== $revision->modulo->docente_id || $request->user()->tipo !== 'docente') {
-            abort(403, 'No estás autorizado para justificar esta revisión.');
-        }
+        // Asegúrate de cargar la relación 'modulo' y 'images' aquí
+        $revision->load(['modulo', 'images']);
 
-        // 2. Validación del mensaje de justificación
-        $request->validate([
-            'message' => ['required', 'string', 'max:1000'], // Mensaje requerido, string, máximo 1000 caracteres
+        return Inertia::render('Revision/Edit', [
+            'revision' => $revision,
+            'success' => session('success'),
+            'error' => session('error'),
+        ]);
+    }
+
+    /**
+     * Update the specified revision in storage.
+     */
+    public function update(Request $request, Revision $revision)
+    {
+        $validatedData = $request->validate([
+            'modulo_id' => 'required|exists:modulos,id',
+            'criterio1_1_cumplido' => 'boolean',
+            'criterio1_2_cumplido' => 'boolean',
+            'criterio1_3_cumplido' => 'boolean',
+            'criterio1_4_cumplido' => 'boolean',
+            'criterio2_1_cumplido' => 'boolean',
+            'criterio2_2_cumplido' => 'boolean',
+            'criterio2_3_cumplido' => 'boolean',
+            'criterio2_4_cumplido' => 'boolean',
+            'criterio3_1_cumplido' => 'boolean',
+            'criterio3_2_cumplido' => 'boolean',
+            'observacion' => 'nullable|string|max:1000',
+            'justificacion' => 'nullable|string|max:1000',
+            // Validación para nuevas imágenes
+            'new_images.*' => 'nullable|string|max:5242880',
+            'new_images' => 'array',
+            // Para manejar la eliminación de imágenes existentes (IDs de imágenes a eliminar)
+            'removed_image_ids' => 'array',
+            'removed_image_ids.*' => 'integer|exists:revision_images,id',
         ]);
 
-        // 3. Verificar si ya existe una justificación (opcional, si solo permites una)
-        if ($revision->justificacion) {
-            return redirect()->back()->with('error', 'Esta revisión ya tiene una justificación.');
+        $validatedData['criterio1_1_cumplido'] = $request->boolean('criterio1_1_cumplido');
+        $validatedData['criterio1_2_cumplido'] = $request->boolean('criterio1_2_cumplido');
+        $validatedData['criterio1_3_cumplido'] = $request->boolean('criterio1_3_cumplido');
+        $validatedData['criterio1_4_cumplido'] = $request->boolean('criterio1_4_cumplido');
+        $validatedData['criterio2_1_cumplido'] = $request->boolean('criterio2_1_cumplido');
+        $validatedData['criterio2_2_cumplido'] = $request->boolean('criterio2_2_cumplido');
+        $validatedData['criterio2_3_cumplido'] = $request->boolean('criterio2_3_cumplido');
+        $validatedData['criterio2_4_cumplido'] = $request->boolean('criterio2_4_cumplido');
+        $validatedData['criterio3_1_cumplido'] = $request->boolean('criterio3_1_cumplido');
+        $validatedData['criterio3_2_cumplido'] = $request->boolean('criterio3_2_cumplido');
+
+        $revision->update($validatedData);
+
+        // Eliminar imágenes existentes
+        if ($request->has('removed_image_ids') && is_array($request->removed_image_ids)) {
+            RevisionImage::whereIn('id', $request->removed_image_ids)
+                         ->where('revision_id', $revision->id)
+                         ->delete();
         }
 
-        // 4. Guardar la justificación en la revisión
-        $revision->justificacion = $request->input('message');
-        $revision->save();
+        // Guardar nuevas imágenes
+        if ($request->has('new_images') && is_array($request->new_images)) {
+            foreach ($request->new_images as $imageData) {
+                if (preg_match('/^data:(.*?);base64,(.*)$/', $imageData, $matches)) {
+                    $mimeType = $matches[1];
+                    $base64Data = $matches[2];
 
-        // 5. Redirigir de vuelta a la página del módulo con un mensaje de éxito
-        return redirect()->route('modulos.show', $revision->modulo_id)->with('success', 'Justificación enviada correctamente.');
+                    RevisionImage::create([
+                        'revision_id' => $revision->id,
+                        'image_base64' => $base64Data,
+                        'mime_type' => $mimeType,
+                    ]);
+                }
+            }
+        }
+
+        $this->updateModuloPorcentajeAvance($revision->modulo);
+
+        return redirect()->route('modulos.show', $revision->modulo_id)
+                         ->with('success', 'Revisión actualizada exitosamente.');
     }
 
+    /**
+     * Handle justification submission for a revision.
+     */
+    public function justify(Request $request, Revision $revision)
+    {
+        $request->validate([
+            'message' => 'required|string|max:1000',
+        ]);
+
+        $revision->update(['justificacion' => $request->message]);
+
+        return redirect()->back()->with('success', 'Justificación enviada exitosamente.');
+    }
+
+    /**
+     * Remove the specified revision from storage.
+     */
+    public function destroy(Revision $revision)
+    {
+        $moduloId = $revision->modulo_id; // Guarda el ID del módulo antes de eliminar la revisión
+        $revision->delete();
+
+        return redirect()->route('modulos.show', $moduloId) // Redirige de vuelta al módulo
+                         ->with('success', 'Revisión eliminada exitosamente.');
+    }
+
+
+
+     protected function updateModuloPorcentajeAvance(Modulo $modulo)
+    {
+        $ultimaRevision = $modulo->revisiones()->latest()->first();
+
+        $porcentajeAvance = 0;
+        if ($ultimaRevision) {
+            $totalScoreUltimaRevision = 0;
+            if ($ultimaRevision->criterio1_1_cumplido) $totalScoreUltimaRevision += 1;
+            if ($ultimaRevision->criterio1_2_cumplido) $totalScoreUltimaRevision += 1;
+            if ($ultimaRevision->criterio1_3_cumplido) $totalScoreUltimaRevision += 1;
+            if ($ultimaRevision->criterio1_4_cumplido) $totalScoreUltimaRevision += 1;
+            if ($ultimaRevision->criterio2_1_cumplido) $totalScoreUltimaRevision += 1;
+            if ($ultimaRevision->criterio2_2_cumplido) $totalScoreUltimaRevision += 1;
+            if ($ultimaRevision->criterio2_3_cumplido) $totalScoreUltimaRevision += 1;
+            if ($ultimaRevision->criterio2_4_cumplido) $totalScoreUltimaRevision += 1;
+            if ($ultimaRevision->criterio3_1_cumplido) $totalScoreUltimaRevision += 1;
+            if ($ultimaRevision->criterio3_2_cumplido) $totalScoreUltimaRevision += 1;
+
+            $porcentajeAvance = ($totalScoreUltimaRevision / 10) * 100;
+        }
+
+        // Actualizar el campo porcentaje_avance en el módulo
+        $modulo->update(['porcentaje_avance' => round($porcentajeAvance, 2)]);
+    }
 }
