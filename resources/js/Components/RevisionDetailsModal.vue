@@ -1,6 +1,6 @@
 <script setup>
 import { computed, ref } from 'vue';
-import ImageCarouselModal from '@/Components/ImageCarouselModal.vue'; // Importa el nuevo componente
+import ImageCarouselModal from '@/Components/ImageCarouselModal.vue';
 
 const props = defineProps({
     show: {
@@ -15,19 +15,16 @@ const props = defineProps({
 
 const emit = defineEmits(['close']);
 
-// Estado para el carrusel de imágenes
 const showImageCarousel = ref(false);
 const carouselImages = ref([]);
 const initialCarouselIndex = ref(0);
 
-// Función auxiliar para mostrar el icono de check o cruz
 const getCheckIcon = (isCumplido) => {
     return isCumplido
         ? '<svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 inline-block mr-2 text-green-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" /></svg>'
         : '<svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 inline-block mr-2 text-red-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" /></svg>';
 };
 
-// Calcula la nota total para mostrar en el modal
 const totalScore = computed(() => {
     let score = 0;
     if (props.revision.criterio1_1_cumplido) score += 1;
@@ -43,7 +40,6 @@ const totalScore = computed(() => {
     return score;
 });
 
-// Función para abrir el carrusel
 const openCarousel = (index) => {
     carouselImages.value = props.revision.images.map(img => ({
         id: img.id,
@@ -65,70 +61,94 @@ const closeCarousel = () => {
             <h3 class="text-xl font-semibold text-gray-900 dark:text-gray-100 mb-4">Detalles de Revisión #{{ revision.id }}</h3>
 
             <div class="mb-6">
-                <p><strong>Módulo:</strong> {{ revision.modulo ? revision.modulo.nombre : 'N/A' }}</p>
+                <p><strong>Módulo:</strong> {{ revision.modulo ? revision.modulo.name : 'N/A' }}</p>
                 <p><strong>Fecha de Revisión:</strong> {{ new Date(revision.created_at).toLocaleDateString() }}</p>
             </div>
 
             <div class="mb-6">
                 <h4 class="font-semibold text-gray-700 dark:text-gray-300 mb-2">Criterios de Revisión</h4>
 
-                <!-- Categoría 1 (4 Puntos) -->
+                <!-- Categoría 1: Presentación (4 Puntos) -->
                 <div class="mb-4">
-                    <h5 class="font-semibold text-gray-700 dark:text-gray-300 mb-2">Categoría 1 (4 Puntos)</h5>
+                    <h5 class="font-semibold text-gray-700 dark:text-gray-300 mb-2">Categoría 1: Presentación (4 Puntos)</h5>
                     <ul>
                         <li class="flex items-center mb-1">
                             <span v-html="getCheckIcon(revision.criterio1_1_cumplido)"></span>
-                            Criterio 1.1: Claridad en la introducción
+                            1.1: Meta
                         </li>
                         <li class="flex items-center mb-1">
                             <span v-html="getCheckIcon(revision.criterio1_2_cumplido)"></span>
-                            Criterio 1.2: Objetivos bien definidos
+                            1.2: Bienvenida
                         </li>
                         <li class="flex items-center mb-1">
                             <span v-html="getCheckIcon(revision.criterio1_3_cumplido)"></span>
-                            Criterio 1.3: Metodología adecuada
+                            1.3: Diagrama Introductorio
                         </li>
                         <li class="flex items-center mb-1">
                             <span v-html="getCheckIcon(revision.criterio1_4_cumplido)"></span>
-                            Criterio 1.4: Relevancia del tema
+                            1.4: Problema formativo a resolver
+                        </li>
+                        <li class="flex items-center mb-1">
+                            <span v-html="getCheckIcon(revision.criterio1_5_cumplido)"></span>
+                            1.5: Aprendizajes esperados
+                        </li>
+                        <li class="flex items-center mb-1">
+                            <span v-html="getCheckIcon(revision.criterio1_6_cumplido)"></span>
+                            1.6: Competencia
+                        </li>
+                        <li class="flex items-center mb-1">
+                            <span v-html="getCheckIcon(revision.criterio1_7_cumplido)"></span>
+                            1.7: Criterios de evaluación
                         </li>
                     </ul>
                 </div>
 
-                <!-- Categoría 2 (4 Puntos) -->
+                <!-- Categoría 2: Organización (4 Puntos) -->
                 <div class="mb-4">
-                    <h5 class="font-semibold text-gray-700 dark:text-gray-300 mb-2">Categoría 2 (4 Puntos)</h5>
+                    <h5 class="font-semibold text-gray-700 dark:text-gray-300 mb-2">Categoría 2: Organización (4 Puntos)</h5>
                     <ul>
                         <li class="flex items-center mb-1">
                             <span v-html="getCheckIcon(revision.criterio2_1_cumplido)"></span>
-                            Criterio 2.1: Desarrollo coherente
+                            2.1: Direccionamiento
                         </li>
                         <li class="flex items-center mb-1">
                             <span v-html="getCheckIcon(revision.criterio2_2_cumplido)"></span>
-                            Criterio 2.2: Uso de fuentes apropiadas
+                            2.2: Enlaces
                         </li>
                         <li class="flex items-center mb-1">
                             <span v-html="getCheckIcon(revision.criterio2_3_cumplido)"></span>
-                            Criterio 2.3: Análisis crítico
+                            2.3: Recursos de Organización
                         </li>
                         <li class="flex items-center mb-1">
                             <span v-html="getCheckIcon(revision.criterio2_4_cumplido)"></span>
-                            Criterio 2.4: Originalidad y aporte
+                            2.4: Información del docente
+                        </li>
+                        <li class="flex items-center mb-1">
+                            <span v-html="getCheckIcon(revision.criterio2_5_cumplido)"></span>
+                            2.5: Bibliografía básica y complementaria
+                        </li>
+                        <li class="flex items-center mb-1">
+                            <span v-html="getCheckIcon(revision.criterio2_6_cumplido)"></span>
+                            2.6: Programa académico
+                        </li>
+                        <li class="flex items-center mb-1">
+                            <span v-html="getCheckIcon(revision.criterio2_7_cumplido)"></span>
+                            2.7: Cronograma de avance
                         </li>
                     </ul>
                 </div>
 
-                <!-- Categoría 3 (2 Puntos) -->
+                <!-- Categoría 3: Semana 1 (2 Puntos) -->
                 <div class="mb-4">
-                    <h5 class="font-semibold text-gray-700 dark:text-gray-300 mb-2">Categoría 3 (2 Puntos)</h5>
+                    <h5 class="font-semibold text-gray-700 dark:text-gray-300 mb-2">Categoría 3: Semana 1 (2 Puntos)</h5>
                     <ul>
                         <li class="flex items-center mb-1">
                             <span v-html="getCheckIcon(revision.criterio3_1_cumplido)"></span>
-                            Criterio 3.1: Conclusiones claras
+                            3.1: Recursos
                         </li>
                         <li class="flex items-center mb-1">
                             <span v-html="getCheckIcon(revision.criterio3_2_cumplido)"></span>
-                            Criterio 3.2: Bibliografía adecuada
+                            3.2: Actividades
                         </li>
                     </ul>
                 </div>

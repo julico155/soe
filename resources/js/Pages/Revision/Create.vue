@@ -5,7 +5,7 @@ import InputLabel from '@/Components/InputLabel.vue';
 import PrimaryButton from '@/Components/PrimaryButton.vue';
 import Checkbox from '@/Components/Checkbox.vue';
 import { Head, useForm, Link } from '@inertiajs/vue3';
-import { computed, ref } from 'vue';
+import { computed } from 'vue';
 
 const props = defineProps({
     modulo: Object,
@@ -24,7 +24,7 @@ const form = useForm({
     criterio3_1_cumplido: false,
     criterio3_2_cumplido: false,
     observacion: '',
-    images: [], // Array para almacenar las imágenes Base64
+    images: [],
 });
 
 const totalScore = computed(() => {
@@ -46,13 +46,13 @@ const canSubmit = computed(() => !form.processing);
 
 const handleImageUpload = (event) => {
     const files = event.target.files;
-    form.images = []; // Limpiar imágenes anteriores al seleccionar nuevas
+    form.images = [];
     for (let i = 0; i < files.length; i++) {
         const file = files[i];
         if (file.type.startsWith('image/')) {
             const reader = new FileReader();
             reader.onload = (e) => {
-                form.images.push(e.target.result); // Guarda la imagen como Base64
+                form.images.push(e.target.result);
             };
             reader.readAsDataURL(file);
         } else {
@@ -69,7 +69,7 @@ const submit = () => {
     form.post(route('modulos.revisiones.store', props.modulo.id), {
         onSuccess: () => {
             form.reset();
-            form.images = []; // Asegurarse de limpiar el array de imágenes
+            form.images = [];
         },
         onError: (errors) => {
             console.error('Error al guardar la revisión:', errors);
@@ -94,70 +94,109 @@ const submit = () => {
                     <div class="p-6 text-gray-900 dark:text-gray-100">
                         <form @submit.prevent="submit">
                             <!-- Campo de selección de Módulo -->
-                            
+                            <div class="mb-4">
+                                <InputLabel for="modulo_id" value="Módulo" />
+                                <select id="modulo_id" v-model="form.modulo_id" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50 dark:bg-gray-700 dark:border-gray-600 dark:text-gray-200">
+                                    <option value="">Seleccione un módulo</option>
+                                    <!-- Asegúrate de pasar 'modules' como prop desde el controlador si usas esto -->
+                                    <!-- <option v-for="module in modules" :key="module.id" :value="module.id">{{ module.name }}</option> -->
+                                </select>
+                                <InputError class="mt-2" :message="form.errors.modulo_id" />
+                            </div>
+
                             <h3 class="text-lg font-medium text-gray-900 dark:text-gray-100 mb-4">Criterios de Revisión (Checklist - Total 10 Puntos)</h3>
 
-                            <!-- Categoría 1 (4 puntos) -->
+                            <!-- Categoría 1: Presentación (4 puntos) -->
                             <div class="mb-6 border p-4 rounded-md dark:border-gray-700">
-                                <h4 class="font-semibold text-gray-700 dark:text-gray-300 mb-3">Categoría 1 (4 Puntos)</h4>
+                                <h4 class="font-semibold text-gray-700 dark:text-gray-300 mb-3">Categoría 1: Presentación (4 Puntos)</h4>
                                 <div class="mb-3 flex items-center">
                                     <Checkbox id="criterio1_1" v-model:checked="form.criterio1_1_cumplido" />
-                                    <InputLabel for="criterio1_1" class="ml-2">Criterio 1.1: Claridad en la introducción</InputLabel>
+                                    <InputLabel for="criterio1_1" class="ml-2">1.1: Meta</InputLabel>
                                     <InputError class="ml-2" :message="form.errors.criterio1_1_cumplido" />
                                 </div>
                                 <div class="mb-3 flex items-center">
                                     <Checkbox id="criterio1_2" v-model:checked="form.criterio1_2_cumplido" />
-                                    <InputLabel for="criterio1_2" class="ml-2">Criterio 1.2: Objetivos bien definidos</InputLabel>
+                                    <InputLabel for="criterio1_2" class="ml-2">1.2: Bienvenida</InputLabel>
                                     <InputError class="ml-2" :message="form.errors.criterio1_2_cumplido" />
                                 </div>
                                 <div class="mb-3 flex items-center">
                                     <Checkbox id="criterio1_3" v-model:checked="form.criterio1_3_cumplido" />
-                                    <InputLabel for="criterio1_3" class="ml-2">Criterio 1.3: Metodología adecuada</InputLabel>
+                                    <InputLabel for="criterio1_3" class="ml-2">1.3: Diagrama Introductorio</InputLabel>
                                     <InputError class="ml-2" :message="form.errors.criterio1_3_cumplido" />
                                 </div>
                                 <div class="mb-3 flex items-center">
                                     <Checkbox id="criterio1_4" v-model:checked="form.criterio1_4_cumplido" />
-                                    <InputLabel for="criterio1_4" class="ml-2">Criterio 1.4: Relevancia del tema</InputLabel>
+                                    <InputLabel for="criterio1_4" class="ml-2">1.4: Problema formativo a resolver</InputLabel>
                                     <InputError class="ml-2" :message="form.errors.criterio1_4_cumplido" />
+                                </div>
+                                <div class="mb-3 flex items-center">
+                                    <Checkbox id="criterio1_5" v-model:checked="form.criterio1_5_cumplido" />
+                                    <InputLabel for="criterio1_5" class="ml-2">1.5: Aprendizajes esperados</InputLabel>
+                                    <InputError class="ml-2" :message="form.errors.criterio1_5_cumplido" />
+                                </div>
+                                <div class="mb-3 flex items-center">
+                                    <Checkbox id="criterio1_6" v-model:checked="form.criterio1_6_cumplido" />
+                                    <InputLabel for="criterio1_6" class="ml-2">1.6: Competencia</InputLabel>
+                                    <InputError class="ml-2" :message="form.errors.criterio1_6_cumplido" />
+                                </div>
+                                <div class="mb-3 flex items-center">
+                                    <Checkbox id="criterio1_7" v-model:checked="form.criterio1_7_cumplido" />
+                                    <InputLabel for="criterio1_7" class="ml-2">1.7: Criterios de evaluación</InputLabel>
+                                    <InputError class="ml-2" :message="form.errors.criterio1_7_cumplido" />
                                 </div>
                             </div>
 
-                            <!-- Categoría 2 (4 puntos) -->
+                            <!-- Categoría 2: Organización (4 puntos) -->
                             <div class="mb-6 border p-4 rounded-md dark:border-gray-700">
-                                <h4 class="font-semibold text-gray-700 dark:text-gray-300 mb-3">Categoría 2 (4 Puntos)</h4>
+                                <h4 class="font-semibold text-gray-700 dark:text-gray-300 mb-3">Categoría 2: Organización (4 Puntos)</h4>
                                 <div class="mb-3 flex items-center">
                                     <Checkbox id="criterio2_1" v-model:checked="form.criterio2_1_cumplido" />
-                                    <InputLabel for="criterio2_1" class="ml-2">Criterio 2.1: Desarrollo coherente</InputLabel>
+                                    <InputLabel for="criterio2_1" class="ml-2">2.1: Direccionamiento</InputLabel>
                                     <InputError class="ml-2" :message="form.errors.criterio2_1_cumplido" />
                                 </div>
                                 <div class="mb-3 flex items-center">
                                     <Checkbox id="criterio2_2" v-model:checked="form.criterio2_2_cumplido" />
-                                    <InputLabel for="criterio2_2" class="ml-2">Criterio 2.2: Uso de fuentes apropiadas</InputLabel>
+                                    <InputLabel for="criterio2_2" class="ml-2">2.2: Enlaces</InputLabel>
                                     <InputError class="ml-2" :message="form.errors.criterio2_2_cumplido" />
                                 </div>
                                 <div class="mb-3 flex items-center">
                                     <Checkbox id="criterio2_3" v-model:checked="form.criterio2_3_cumplido" />
-                                    <InputLabel for="criterio2_3" class="ml-2">Criterio 2.3: Análisis crítico</InputLabel>
+                                    <InputLabel for="criterio2_3" class="ml-2">2.3: Recursos de Organización</InputLabel>
                                     <InputError class="ml-2" :message="form.errors.criterio2_3_cumplido" />
                                 </div>
                                 <div class="mb-3 flex items-center">
                                     <Checkbox id="criterio2_4" v-model:checked="form.criterio2_4_cumplido" />
-                                    <InputLabel for="criterio2_4" class="ml-2">Criterio 2.4: Originalidad y aporte</InputLabel>
+                                    <InputLabel for="criterio2_4" class="ml-2">2.4: Información del docente</InputLabel>
                                     <InputError class="ml-2" :message="form.errors.criterio2_4_cumplido" />
+                                </div>
+                                <div class="mb-3 flex items-center">
+                                    <Checkbox id="criterio2_5" v-model:checked="form.criterio2_5_cumplido" />
+                                    <InputLabel for="criterio2_5" class="ml-2">2.5: Bibliografía básica y complementaria</InputLabel>
+                                    <InputError class="ml-2" :message="form.errors.criterio2_5_cumplido" />
+                                </div>
+                                <div class="mb-3 flex items-center">
+                                    <Checkbox id="criterio2_6" v-model:checked="form.criterio2_6_cumplido" />
+                                    <InputLabel for="criterio2_6" class="ml-2">2.6: Programa académico</InputLabel>
+                                    <InputError class="ml-2" :message="form.errors.criterio2_6_cumplido" />
+                                </div>
+                                <div class="mb-3 flex items-center">
+                                    <Checkbox id="criterio2_7" v-model:checked="form.criterio2_7_cumplido" />
+                                    <InputLabel for="criterio2_7" class="ml-2">2.7: Cronograma de avance</InputLabel>
+                                    <InputError class="ml-2" :message="form.errors.criterio2_7_cumplido" />
                                 </div>
                             </div>
 
-                            <!-- Categoría 3 (2 puntos) -->
+                            <!-- Categoría 3: Semana 1 (2 puntos) -->
                             <div class="mb-6 border p-4 rounded-md dark:border-gray-700">
-                                <h4 class="font-semibold text-gray-700 dark:text-gray-300 mb-3">Categoría 3 (2 Puntos)</h4>
+                                <h4 class="font-semibold text-gray-700 dark:text-gray-300 mb-3">Categoría 3: Semana 1 (2 Puntos)</h4>
                                 <div class="mb-3 flex items-center">
                                     <Checkbox id="criterio3_1" v-model:checked="form.criterio3_1_cumplido" />
-                                    <InputLabel for="criterio3_1" class="ml-2">Criterio 3.1: Conclusiones claras</InputLabel>
+                                    <InputLabel for="criterio3_1" class="ml-2">3.1: Recursos</InputLabel>
                                     <InputError class="ml-2" :message="form.errors.criterio3_1_cumplido" />
                                 </div>
                                 <div class="mb-3 flex items-center">
                                     <Checkbox id="criterio3_2" v-model:checked="form.criterio3_2_cumplido" />
-                                    <InputLabel for="criterio3_2" class="ml-2">Criterio 3.2: Bibliografía adecuada</InputLabel>
+                                    <InputLabel for="criterio3_2" class="ml-2">3.2: Actividades</InputLabel>
                                     <InputError class="ml-2" :message="form.errors.criterio3_2_cumplido" />
                                 </div>
                             </div>
